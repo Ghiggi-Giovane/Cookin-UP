@@ -1,35 +1,49 @@
 <template>
   <main class="conteudo-principal">
     <SuaLista :ingredientes="ingredientes" />
+    <!-- KeepAlive = manter vivo, componente nativo do vue que serve para preservar o estado dos componentes que estáo dentro dele, funciona bem com v-if e v-else -->
+    <KeepAlive include="SelecionarIngredientes">
+      <SelecionarIngredientes
+        v-if="conteudo === 'SelecionarIngredientes'"
+        @adicionar-ingrediente="adicionarIngrediente"
+        @remover-ingrediente="removerIngrediente"
+        @buscar-receitas="navegar('MostrarReceitas')" />
 
-    <SelecionarIngredientes
-      @adicionar-ingrediente="adicionarIngrediente"
-      @remover-ingrediente="removerIngrediente"
-    />
+      <MostrarReceitas
+        v-else-if="conteudo === 'MostrarReceitas'"
+        @editar-receitas="navegar('SelecionarIngredientes')"
+    /></KeepAlive>
   </main>
 </template>
 
 <script lang="ts">
+import MostrarReceitas from './MostrarReceitas.vue'
 import SelecionarIngredientes from './SelecionarIngredientes.vue'
 import SuaLista from './SuaLista.vue'
 import Tag from './Tag.vue'
 
+type Pagina = 'SelecionarIngredientes' | 'MostrarReceitas' // Definindo uma tipagem no typescript
+
 export default {
   data() {
     return {
-      ingredientes: [] as string[] // as string[] utilizado no TS para TIPAR o array quando for vazio
+      ingredientes: [] as string[], // as string[] utilizado no TS para TIPAR o array quando for vazio
+      conteudo: 'SelecionarIngredientes' as Pagina
     }
   },
-  components: { SelecionarIngredientes, Tag, SuaLista },
-
+  components: { SelecionarIngredientes, Tag, SuaLista, MostrarReceitas },
   methods: {
     adicionarIngrediente(ingrediente: string) {
       this.ingredientes.push(ingrediente)
     },
     removerIngrediente(ingrediente: string) {
       this.ingredientes = this.ingredientes.filter((i) => ingrediente !== i)
+    },
+    navegar(pagina: Pagina) {
+      this.conteudo = pagina
     }
-  }
+  },
+  emits: ['adicionarIngrediente', 'removerIngrediente']
 }
 </script>
 
